@@ -1,0 +1,4 @@
+repository "Codex demo GDS5 30-06-2026/Codex demo GDS5 30-06-2026@18967761424554@cloud"
+  path "/"
+    br "/main"
+    co "/main"
