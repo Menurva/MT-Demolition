@@ -21,7 +21,7 @@ public class Scalechanging : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.J))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             isReduced = !isReduced;
             isGrown = false;
@@ -29,7 +29,7 @@ public class Scalechanging : MonoBehaviour
             ApplyScale(isReduced ? reducedScaleMultiplier : 1f);
         }
 
-        if (Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             isGrown = !isGrown;
             isReduced = false;
