@@ -5416,5 +5416,18 @@ MonoBehaviour:
         isBuiltIn: 0
         script: {fileID: 11500000, guid: 562fe433aa1a2bf469038e04c98de69b, type: 3}
         hasToggle: 1
+      - displayName: CarJumpMechanic
+        name: CarJumpMechanic, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        content:
+          m_Text: CarJumpMechanic
+          m_Image: {fileID: -8204150473280056172, guid: 0000000000000000d000000000000000, type: 0}
+          m_Tooltip: CarJumpMechanic
+          m_TextWithWhitespace: "CarJumpMechanic\u200B"
+        shown: 0
+        excluded: 0
+        isBuiltIn: 0
+        script: {fileID: 11500000, guid: b5b827fc46594b7198434c3241ef3b91, type: 3}
+        hasToggle: 1
     unityVersion: 6000.3.17f1
     unityCount: 386

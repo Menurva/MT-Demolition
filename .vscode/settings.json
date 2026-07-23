@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Monster Demolisher.slnx"
+    "dotnet.defaultSolution": "MT Demolition.slnx"
 }
