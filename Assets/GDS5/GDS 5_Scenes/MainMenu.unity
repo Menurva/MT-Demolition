@@ -119,67 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &264494215
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 554251577582351362, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_Name
-      value: Menu UI
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -553.7631
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.76168
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -17.924988
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6264016016528222429, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8357872159780603115, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 935a17187d24e704e9e95798ee367c1c, type: 3}
 --- !u!1 &383035743
 GameObject:
   m_ObjectHideFlags: 0
@@ -5210,6 +5149,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4104496877146973400}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &554251577385101445
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6264016016373085274}
+  - component: {fileID: 8357872159717742700}
+  - component: {fileID: 3285430843405331288}
+  m_Layer: 5
+  m_Name: Menu UI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!4 &559790831547321429
 Transform:
   m_ObjectHideFlags: 0
@@ -15604,6 +15561,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6596676032059638252}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3285430843405331288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554251577385101445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1839ecc3ab736644b858854bcbfa7054, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuEvent
 --- !u!20 &3433314140022672334
 Camera:
   m_ObjectHideFlags: 0
@@ -21712,6 +21681,21 @@ Transform:
   - {fileID: 3808086267242577173}
   m_Father: {fileID: 4182546006148806257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &6264016016373085274
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554251577385101445}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -553.7631, y: 5.76168, z: -17.924988}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6279538544118110648
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -22656,6 +22640,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6596676032059638252}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8357872159717742700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554251577385101445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 887318073368c944ab6aa2f1f3df8977, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: a654d6960a996544ea31f628aba3679e, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!1 &8358918707416343988
 GameObject:
   m_ObjectHideFlags: 0
@@ -23104,5 +23111,5 @@ SceneRoots:
   - {fileID: 6660247424192767981}
   - {fileID: 1430106268823550514}
   - {fileID: 3708672994424416532}
-  - {fileID: 264494215}
+  - {fileID: 6264016016373085274}
   - {fileID: 383035745}
