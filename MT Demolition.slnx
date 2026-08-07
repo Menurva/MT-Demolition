@@ -1,5 +1,7 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="CodeMonkey_HealthSystem.csproj" />
   <Project Path="Wooshii.HierarchyDecorator.Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="CodeMonkey_HealthSystem_Editor.csproj" />
 </Solution>

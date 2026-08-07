@@ -2,17 +2,31 @@ using UnityEngine;
 
 public class WheelDisplacementOnTrigger : MonoBehaviour
 {
+    private enum WheelMode
+    {
+        Normal,
+        Reduced,
+        Expanded
+    }
+
     [Header("Car Speed")]
     [SerializeField] private PrometeoCarController carController;
     [SerializeField] private int displacedMaxSpeed = 120;
     [SerializeField] private int displacedMaxReverseSpeed = 60;
     [SerializeField] private int displacedAccelerationMultiplier = 5;
 
-    [Header("Wheels")]
+    [Header("Wheel Meshes")]
     [SerializeField] private Transform frontLeftWheel;
     [SerializeField] private Transform frontRightWheel;
     [SerializeField] private Transform rearLeftWheel;
     [SerializeField] private Transform rearRightWheel;
+
+    [Header("Wheel Colliders")]
+    [SerializeField] private WheelCollider[] colliderTargets = new WheelCollider[4];
+
+    [Header("Wheel Scale")]
+    [SerializeField] private float reducedScaleMultiplier = 0.75f;
+    [SerializeField] private float growScaleMultiplier = 2f;
 
     [Header("Effects")]
     [SerializeField] private Transform frontLeftEffect;
@@ -20,81 +34,64 @@ public class WheelDisplacementOnTrigger : MonoBehaviour
     [SerializeField] private Transform rearLeftEffect;
     [SerializeField] private Transform rearRightEffect;
 
-    [Header("Target Local Positions")]
+    [Header("Expanded Local Positions")]
     [SerializeField] private Vector3 frontLeftTargetLocalPosition;
     [SerializeField] private Vector3 frontRightTargetLocalPosition;
     [SerializeField] private Vector3 rearLeftTargetLocalPosition;
     [SerializeField] private Vector3 rearRightTargetLocalPosition;
 
-    private Vector3 frontLeftOriginalLocalPosition;
-    private Vector3 frontRightOriginalLocalPosition;
-    private Vector3 rearLeftOriginalLocalPosition;
-    private Vector3 rearRightOriginalLocalPosition;
-    private Vector3 frontLeftEffectOriginalLocalPosition;
-    private Vector3 frontRightEffectOriginalLocalPosition;
-    private Vector3 rearLeftEffectOriginalLocalPosition;
-    private Vector3 rearRightEffectOriginalLocalPosition;
+    private readonly Transform[] wheelTargets = new Transform[4];
+    private readonly Vector3[] originalWheelLocalPositions = new Vector3[4];
+    private readonly Vector3[] originalWheelScales = new Vector3[4];
+    private readonly Vector3[] originalColliderLocalPositions = new Vector3[4];
+    private readonly float[] originalColliderRadii = new float[4];
+    private readonly Transform[] effectTargets = new Transform[4];
+    private readonly Vector3[] originalEffectLocalPositions = new Vector3[4];
+    private readonly Vector3[] expandedLocalPositions = new Vector3[4];
+
     private int originalMaxSpeed;
     private int originalMaxReverseSpeed;
     private int originalAccelerationMultiplier;
-    private bool isDisplaced;
+    private WheelMode currentMode;
 
     private void Start()
     {
+        BuildTargetCollections();
         StoreOriginalCarSpeed();
-        StoreOriginalPositions();
+        StoreOriginalWheelValues();
         WarnForMissingAssignments();
+        ApplyMode(WheelMode.Normal);
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            SetMode(currentMode == WheelMode.Reduced ? WheelMode.Normal : WheelMode.Reduced);
+        }
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            ToggleWheelDisplacement();
+            SetMode(currentMode == WheelMode.Expanded ? WheelMode.Normal : WheelMode.Expanded);
         }
     }
 
-    private void StoreOriginalPositions()
+    private void BuildTargetCollections()
     {
-        if (frontLeftWheel != null)
-        {
-            frontLeftOriginalLocalPosition = frontLeftWheel.localPosition;
-        }
+        wheelTargets[0] = frontLeftWheel;
+        wheelTargets[1] = frontRightWheel;
+        wheelTargets[2] = rearLeftWheel;
+        wheelTargets[3] = rearRightWheel;
 
-        if (frontRightWheel != null)
-        {
-            frontRightOriginalLocalPosition = frontRightWheel.localPosition;
-        }
+        effectTargets[0] = frontLeftEffect;
+        effectTargets[1] = frontRightEffect;
+        effectTargets[2] = rearLeftEffect;
+        effectTargets[3] = rearRightEffect;
 
-        if (rearLeftWheel != null)
-        {
-            rearLeftOriginalLocalPosition = rearLeftWheel.localPosition;
-        }
-
-        if (rearRightWheel != null)
-        {
-            rearRightOriginalLocalPosition = rearRightWheel.localPosition;
-        }
-
-        if (frontLeftEffect != null)
-        {
-            frontLeftEffectOriginalLocalPosition = frontLeftEffect.localPosition;
-        }
-
-        if (frontRightEffect != null)
-        {
-            frontRightEffectOriginalLocalPosition = frontRightEffect.localPosition;
-        }
-
-        if (rearLeftEffect != null)
-        {
-            rearLeftEffectOriginalLocalPosition = rearLeftEffect.localPosition;
-        }
-
-        if (rearRightEffect != null)
-        {
-            rearRightEffectOriginalLocalPosition = rearRightEffect.localPosition;
-        }
+        expandedLocalPositions[0] = frontLeftTargetLocalPosition;
+        expandedLocalPositions[1] = frontRightTargetLocalPosition;
+        expandedLocalPositions[2] = rearLeftTargetLocalPosition;
+        expandedLocalPositions[3] = rearRightTargetLocalPosition;
     }
 
     private void StoreOriginalCarSpeed()
@@ -109,81 +106,144 @@ public class WheelDisplacementOnTrigger : MonoBehaviour
         originalAccelerationMultiplier = carController.accelerationMultiplier;
     }
 
-    private void WarnForMissingAssignments()
+    private void StoreOriginalWheelValues()
     {
-        if (carController == null)
+        for (int i = 0; i < wheelTargets.Length; i++)
         {
-            Debug.LogWarning("Car Controller is not assigned on WheelDisplacementOnTrigger. Wheel movement will work, but car speed will not change.", this);
-        }
+            if (wheelTargets[i] != null)
+            {
+                originalWheelLocalPositions[i] = wheelTargets[i].localPosition;
+                originalWheelScales[i] = wheelTargets[i].localScale;
+            }
 
-        if (frontLeftWheel == null)
-        {
-            Debug.LogWarning("Front Left Wheel is not assigned on WheelDisplacementOnTrigger.", this);
-        }
+            if (HasColliderAt(i))
+            {
+                originalColliderLocalPositions[i] = colliderTargets[i].transform.localPosition;
+                originalColliderRadii[i] = colliderTargets[i].radius;
+            }
 
-        if (frontRightWheel == null)
-        {
-            Debug.LogWarning("Front Right Wheel is not assigned on WheelDisplacementOnTrigger.", this);
-        }
-
-        if (rearLeftWheel == null)
-        {
-            Debug.LogWarning("Rear Left Wheel is not assigned on WheelDisplacementOnTrigger.", this);
-        }
-
-        if (rearRightWheel == null)
-        {
-            Debug.LogWarning("Rear Right Wheel is not assigned on WheelDisplacementOnTrigger.", this);
+            if (effectTargets[i] != null)
+            {
+                originalEffectLocalPositions[i] = effectTargets[i].localPosition;
+            }
         }
     }
 
-    private void ToggleWheelDisplacement()
+    private void SetMode(WheelMode nextMode)
     {
-        isDisplaced = !isDisplaced;
-
-        SetWheelLocalPosition(frontLeftWheel, frontLeftOriginalLocalPosition, frontLeftTargetLocalPosition);
-        SetWheelLocalPosition(frontRightWheel, frontRightOriginalLocalPosition, frontRightTargetLocalPosition);
-        SetWheelLocalPosition(rearLeftWheel, rearLeftOriginalLocalPosition, rearLeftTargetLocalPosition);
-        SetWheelLocalPosition(rearRightWheel, rearRightOriginalLocalPosition, rearRightTargetLocalPosition);
-
-        SetEffectLocalPosition(frontLeftEffect, frontLeftEffectOriginalLocalPosition, frontLeftOriginalLocalPosition, frontLeftTargetLocalPosition);
-        SetEffectLocalPosition(frontRightEffect, frontRightEffectOriginalLocalPosition, frontRightOriginalLocalPosition, frontRightTargetLocalPosition);
-        SetEffectLocalPosition(rearLeftEffect, rearLeftEffectOriginalLocalPosition, rearLeftOriginalLocalPosition, rearLeftTargetLocalPosition);
-        SetEffectLocalPosition(rearRightEffect, rearRightEffectOriginalLocalPosition, rearRightOriginalLocalPosition, rearRightTargetLocalPosition);
-
-        ApplyCarSpeed();
+        currentMode = nextMode;
+        ApplyMode(currentMode);
     }
 
-    private void SetWheelLocalPosition(Transform wheel, Vector3 originalLocalPosition, Vector3 targetLocalPosition)
+    private void ApplyMode(WheelMode mode)
     {
+        float scaleMultiplier = 1f;
+
+        if (mode == WheelMode.Reduced)
+        {
+            scaleMultiplier = reducedScaleMultiplier;
+        }
+        else if (mode == WheelMode.Expanded)
+        {
+            scaleMultiplier = growScaleMultiplier;
+        }
+
+        bool useExpandedPosition = mode == WheelMode.Expanded;
+
+        for (int i = 0; i < wheelTargets.Length; i++)
+        {
+            ApplyWheelMesh(i, scaleMultiplier, useExpandedPosition);
+            ApplyWheelCollider(i, scaleMultiplier, useExpandedPosition);
+            ApplyEffect(i, useExpandedPosition);
+        }
+
+        ApplyCarSpeed(useExpandedPosition);
+    }
+
+    private void ApplyWheelMesh(int index, float scaleMultiplier, bool useExpandedPosition)
+    {
+        Transform wheel = wheelTargets[index];
+
         if (wheel == null)
         {
             return;
         }
 
-        wheel.localPosition = isDisplaced ? targetLocalPosition : originalLocalPosition;
+        wheel.localScale = originalWheelScales[index] * scaleMultiplier;
+        wheel.localPosition = useExpandedPosition ? expandedLocalPositions[index] : originalWheelLocalPositions[index];
     }
 
-    private void SetEffectLocalPosition(Transform effect, Vector3 originalEffectLocalPosition, Vector3 originalWheelLocalPosition, Vector3 targetWheelLocalPosition)
+    private void ApplyWheelCollider(int index, float scaleMultiplier, bool useExpandedPosition)
     {
-        if (effect == null)
+        if (!HasColliderAt(index))
         {
             return;
         }
 
-        var wheelDisplacementOffset = targetWheelLocalPosition - originalWheelLocalPosition;
-        effect.localPosition = isDisplaced ? originalEffectLocalPosition + wheelDisplacementOffset : originalEffectLocalPosition;
+        WheelCollider wheelCollider = colliderTargets[index];
+        wheelCollider.radius = originalColliderRadii[index] * scaleMultiplier;
+        wheelCollider.transform.localPosition = useExpandedPosition
+            ? expandedLocalPositions[index]
+            : originalColliderLocalPositions[index];
     }
 
-    private void ApplyCarSpeed()
+    private void ApplyEffect(int index, bool useExpandedPosition)
+    {
+        Transform effectTarget = effectTargets[index];
+
+        if (effectTarget == null)
+        {
+            return;
+        }
+
+        Vector3 displacementOffset = expandedLocalPositions[index] - originalWheelLocalPositions[index];
+        effectTarget.localPosition = useExpandedPosition
+            ? originalEffectLocalPositions[index] + displacementOffset
+            : originalEffectLocalPositions[index];
+    }
+
+    private void ApplyCarSpeed(bool useExpandedValues)
     {
         if (carController == null)
         {
             return;
         }
 
-        carController.maxSpeed = isDisplaced ? displacedMaxSpeed : originalMaxSpeed;
-        carController.maxReverseSpeed = isDisplaced ? displacedMaxReverseSpeed : originalMaxReverseSpeed;
-        carController.accelerationMultiplier = isDisplaced ? displacedAccelerationMultiplier : originalAccelerationMultiplier;
+        carController.maxSpeed = useExpandedValues ? displacedMaxSpeed : originalMaxSpeed;
+        carController.maxReverseSpeed = useExpandedValues ? displacedMaxReverseSpeed : originalMaxReverseSpeed;
+        carController.accelerationMultiplier = useExpandedValues
+            ? displacedAccelerationMultiplier
+            : originalAccelerationMultiplier;
+    }
+
+    private bool HasColliderAt(int index)
+    {
+        return colliderTargets != null
+            && index >= 0
+            && index < colliderTargets.Length
+            && colliderTargets[index] != null;
+    }
+
+    private void WarnForMissingAssignments()
+    {
+        if (carController == null)
+        {
+            Debug.LogWarning("Car Controller is not assigned. Wheel transformation will work, but car speed will not change.", this);
+        }
+
+        for (int i = 0; i < wheelTargets.Length; i++)
+        {
+            if (wheelTargets[i] == null)
+            {
+                Debug.LogWarning($"Wheel mesh {i + 1} is not assigned on WheelDisplacementOnTrigger.", this);
+            }
+
+            if (!HasColliderAt(i))
+            {
+                Debug.LogWarning($"WheelCollider {i + 1} is not assigned on WheelDisplacementOnTrigger.", this);
+            }
+        }
     }
 }
+
+// This component keeps wheel scale, collider radius, displacement, effects, and car-performance changes in one three-state mechanic.

@@ -22,19 +22,21 @@ public class PrometeoCarController : MonoBehaviour
       [Space(20)]
       //[Header("CAR SETUP")]
       [Space(10)]
-      [Range(20, 190)]
+      [Range(20, 100)]
       public int maxSpeed = 90; //The maximum speed that the car can reach in km/h.
       [Range(10, 120)]
       public int maxReverseSpeed = 45; //The maximum speed that the car can reach while going on reverse in km/h.
-      [Range(1, 10)]
-      public int accelerationMultiplier = 2; // How fast the car can accelerate. 1 is a slow acceleration and 10 is the fastest.
-      [Space(10)]
+      [Range(1, 50)]
+      public int accelerationMultiplier = 5; // How fast the car can accelerate. 1 is a slow acceleration and 10 is the fastest.
+      [Space(50)]
       [Range(10, 45)]
-      public int maxSteeringAngle = 27; // The maximum angle that the tires can reach while rotating the steering wheel.
+      public int maxSteeringAngle = 30; // The maximum angle that the tires can reach while rotating the steering wheel.
+      [Range(5, 20)]
+      public int highSpeedSteeringAngle = 5; // The smaller steering limit used when the car approaches maximum speed.
       [Range(0.1f, 1f)]
-      public float steeringSpeed = 0.5f; // How fast the steering wheel turns.
+      public float steeringSpeed = 0.1f; // How fast the steering wheel turns.
       [Space(10)]
-      [Range(100, 600)]
+      [Range(100, 150)]
       public int brakeForce = 350; // The strength of the wheel brakes.
       [Range(1, 10)]
       public int decelerationMultiplier = 2; // How fast the car decelerates when the user is not using the throttle.
@@ -144,6 +146,11 @@ public class PrometeoCarController : MonoBehaviour
       float localVelocityX;
       bool deceleratingCar;
       bool touchControlsSetup = false;
+      bool forwardInputPressed;
+      bool reverseInputPressed;
+      bool handbrakeInputPressed;
+      bool handbrakeInputReleased;
+      float horizontalInput;
       /*
       The following variables are used to store information about sideways friction of the wheels (such as
       extremumSlip,extremumValue, asymptoteSlip, asymptoteValue and stiffness). We change this values to
@@ -161,6 +168,11 @@ public class PrometeoCarController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+      if (!TryGetComponent(out CarWallDamage _))
+      {
+        gameObject.AddComponent<CarWallDamage>();
+      }
+
       //In this part, we set the 'carRigidbody' value with the Rigidbody attached to this
       //gameObject. Also, we define the center of mass of the car with the Vector3 given
       //in the inspector.
@@ -262,14 +274,14 @@ public class PrometeoCarController : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
+    // FixedUpdate keeps WheelCollider input synchronized with Unity's physics simulation.
+    void FixedUpdate()
     {
 
       //CAR DATA
 
-      // We determine the speed of the car.
-      carSpeed = (2 * Mathf.PI * frontLeftCollider.radius * frontLeftCollider.rpm * 60) / 1000;
+      // Measure actual forward speed instead of wheel RPM, which can report false speed while a tire is slipping.
+      carSpeed = Vector3.Dot(transform.forward, carRigidbody.linearVelocity) * 3.6f;
       // Save the local velocity of the car in the x axis. Used to know if the car is drifting.
       localVelocityX = transform.InverseTransformDirection(carRigidbody.linearVelocity).x;
       // Save the local velocity of the car in the z axis. Used to know if the car is going forward or backwards.
@@ -327,48 +339,58 @@ public class PrometeoCarController : MonoBehaviour
 
       }else{
 
-        if(Input.GetKey(KeyCode.W)){
+        if(forwardInputPressed){
           CancelInvoke("DecelerateCar");
           deceleratingCar = false;
           GoForward();
         }
-        if(Input.GetKey(KeyCode.S)){
+        if(reverseInputPressed){
           CancelInvoke("DecelerateCar");
           deceleratingCar = false;
           GoReverse();
         }
 
-        if(Input.GetKey(KeyCode.A)){
-          TurnLeft();
+        // Horizontal input rises and falls smoothly, preventing a key tap from requesting full steering immediately.
+        if(Mathf.Abs(horizontalInput) > 0.01f){
+          ApplySteeringInput(horizontalInput);
+        }else if(steeringAxis != 0f){
+          ResetSteeringAngle();
         }
-        if(Input.GetKey(KeyCode.D)){
-          TurnRight();
-        }
-        if(Input.GetKey(KeyCode.Space)){
+        if(handbrakeInputPressed){
           CancelInvoke("DecelerateCar");
           deceleratingCar = false;
           Handbrake();
         }
-        if(Input.GetKeyUp(KeyCode.Space)){
+        if(handbrakeInputReleased){
           RecoverTraction();
+          handbrakeInputReleased = false;
         }
-        if((!Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))){
+        if((!reverseInputPressed && !forwardInputPressed)){
           ThrottleOff();
         }
-        if((!Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W)) && !Input.GetKey(KeyCode.Space) && !deceleratingCar){
+        if((!reverseInputPressed && !forwardInputPressed) && !handbrakeInputPressed && !deceleratingCar){
           InvokeRepeating("DecelerateCar", 0f, 0.1f);
           deceleratingCar = true;
         }
-        if(!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D) && steeringAxis != 0f){
-          ResetSteeringAngle();
-        }
-
       }
 
 
-      // We call the method AnimateWheelMeshes() in order to match the wheel collider movements with the 3D meshes of the wheels.
-      AnimateWheelMeshes();
+    }
 
+    // Cache frame-based input and update visible wheel meshes while Rigidbody interpolation remains visually smooth.
+    void Update(){
+      if(!useTouchControls){
+        forwardInputPressed = Input.GetKey(KeyCode.W);
+        reverseInputPressed = Input.GetKey(KeyCode.S);
+        handbrakeInputPressed = Input.GetKey(KeyCode.Space);
+        horizontalInput = Input.GetAxis("Horizontal");
+
+        if(Input.GetKeyUp(KeyCode.Space)){
+          handbrakeInputReleased = true;
+        }
+      }
+
+      AnimateWheelMeshes();
     }
 
     // This method converts the car speed data from float to string, and then set the text of the UI carSpeedText with this value.
@@ -424,40 +446,37 @@ public class PrometeoCarController : MonoBehaviour
 
     //The following method turns the front car wheels to the left. The speed of this movement will depend on the steeringSpeed variable.
     public void TurnLeft(){
-      steeringAxis = steeringAxis - (Time.deltaTime * 10f * steeringSpeed);
-      if(steeringAxis < -1f){
-        steeringAxis = -1f;
-      }
-      var steeringAngle = steeringAxis * maxSteeringAngle;
-      frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, steeringAngle, steeringSpeed);
-      frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, steeringAngle, steeringSpeed);
+      ApplySteeringInput(-1f);
     }
 
     //The following method turns the front car wheels to the right. The speed of this movement will depend on the steeringSpeed variable.
     public void TurnRight(){
-      steeringAxis = steeringAxis + (Time.deltaTime * 10f * steeringSpeed);
-      if(steeringAxis > 1f){
-        steeringAxis = 1f;
-      }
-      var steeringAngle = steeringAxis * maxSteeringAngle;
-      frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, steeringAngle, steeringSpeed);
-      frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, steeringAngle, steeringSpeed);
+      ApplySteeringInput(1f);
     }
 
     //The following method takes the front car wheels to their default position (rotation = 0). The speed of this movement will depend
     // on the steeringSpeed variable.
     public void ResetSteeringAngle(){
-      if(steeringAxis < 0f){
-        steeringAxis = steeringAxis + (Time.deltaTime * 10f * steeringSpeed);
-      }else if(steeringAxis > 0f){
-        steeringAxis = steeringAxis - (Time.deltaTime * 10f * steeringSpeed);
-      }
-      if(Mathf.Abs(frontLeftCollider.steerAngle) < 1f){
-        steeringAxis = 0f;
-      }
-      var steeringAngle = steeringAxis * maxSteeringAngle;
-      frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, steeringAngle, steeringSpeed);
-      frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, steeringAngle, steeringSpeed);
+      ApplySteeringInput(0f);
+    }
+
+    // Smooth the driver's input and reduce the available steering angle as road speed increases.
+    void ApplySteeringInput(float input){
+      float clampedInput = Mathf.Clamp(input, -1f, 1f);
+      float inputChangeSpeed = Mathf.Lerp(1.5f, 4f, steeringSpeed);
+      steeringAxis = Mathf.MoveTowards(steeringAxis, clampedInput, inputChangeSpeed * Time.fixedDeltaTime);
+
+      float safeMaximumSpeed = Mathf.Max(1f, maxSpeed);
+      float speedFactor = Mathf.InverseLerp(0f, safeMaximumSpeed, Mathf.Abs(carSpeed));
+      float configuredHighSpeedAngle = highSpeedSteeringAngle > 0 ? highSpeedSteeringAngle : 10f;
+      float safeHighSpeedAngle = Mathf.Clamp(configuredHighSpeedAngle, 0f, maxSteeringAngle);
+      float currentSteeringLimit = Mathf.Lerp(maxSteeringAngle, safeHighSpeedAngle, speedFactor);
+      float targetSteeringAngle = steeringAxis * currentSteeringLimit;
+
+      float wheelTurnSpeed = Mathf.Lerp(40f, 160f, steeringSpeed);
+      float maximumAngleChange = wheelTurnSpeed * Time.fixedDeltaTime;
+      frontLeftCollider.steerAngle = Mathf.MoveTowards(frontLeftCollider.steerAngle, targetSteeringAngle, maximumAngleChange);
+      frontRightCollider.steerAngle = Mathf.MoveTowards(frontRightCollider.steerAngle, targetSteeringAngle, maximumAngleChange);
     }
 
     // This method matches both the position and rotation of the WheelColliders with the WheelMeshes.
@@ -772,3 +791,5 @@ public class PrometeoCarController : MonoBehaviour
     }
 
 }
+
+// This controller reads player input, applies stable speed-sensitive WheelCollider steering, and manages the car's movement and effects.

@@ -20,6 +20,7 @@ public class PrometeoEditor : Editor{
   private SerializedProperty maxReverseSpeed;
   private SerializedProperty accelerationMultiplier;
   private SerializedProperty maxSteeringAngle;
+  private SerializedProperty highSpeedSteeringAngle;
   private SerializedProperty steeringSpeed;
   private SerializedProperty brakeForce;
   private SerializedProperty decelerationMultiplier;
@@ -83,6 +84,7 @@ public class PrometeoEditor : Editor{
     maxReverseSpeed = SO.FindProperty("maxReverseSpeed");
     accelerationMultiplier = SO.FindProperty("accelerationMultiplier");
     maxSteeringAngle = SO.FindProperty("maxSteeringAngle");
+    highSpeedSteeringAngle = SO.FindProperty("highSpeedSteeringAngle");
     steeringSpeed = SO.FindProperty("steeringSpeed");
     brakeForce = SO.FindProperty("brakeForce");
     decelerationMultiplier = SO.FindProperty("decelerationMultiplier");
@@ -132,11 +134,12 @@ public class PrometeoEditor : Editor{
     //CAR SETUP
     //
     //
-    //
-    maxSpeed.intValue = EditorGUILayout.IntSlider("Max Speed:", maxSpeed.intValue, 20, 190);
-    maxReverseSpeed.intValue = EditorGUILayout.IntSlider("Max Reverse Speed:", maxReverseSpeed.intValue, 10, 120);
-    accelerationMultiplier.intValue = EditorGUILayout.IntSlider("Acceleration Multiplier:", accelerationMultiplier.intValue, 1, 10);
+    //Manipulating the slider displayed values//
+    maxSpeed.intValue = EditorGUILayout.IntSlider("Max Speed:", maxSpeed.intValue, 20, 500);
+    maxReverseSpeed.intValue = EditorGUILayout.IntSlider("Max Reverse Speed:", maxReverseSpeed.intValue, 10, 500);
+    accelerationMultiplier.intValue = EditorGUILayout.IntSlider("Acceleration Multiplier:", accelerationMultiplier.intValue, 1, 50);
     maxSteeringAngle.intValue = EditorGUILayout.IntSlider("Max Steering Angle:", maxSteeringAngle.intValue, 10, 45);
+    EditorGUILayout.PropertyField(highSpeedSteeringAngle, new GUIContent("High Speed Steering Angle:"));
     steeringSpeed.floatValue = EditorGUILayout.Slider("Steering Speed:", steeringSpeed.floatValue, 0.1f, 1f);
     brakeForce.intValue = EditorGUILayout.IntSlider("Brake Force:", brakeForce.intValue, 100, 600);
     decelerationMultiplier.intValue = EditorGUILayout.IntSlider("Deceleration Multiplier:", decelerationMultiplier.intValue, 1, 10);
@@ -250,3 +253,5 @@ public class PrometeoEditor : Editor{
   }
 
 }
+
+// This custom Inspector exposes the Prometeo car setup, including its separate low-speed and high-speed steering limits.
