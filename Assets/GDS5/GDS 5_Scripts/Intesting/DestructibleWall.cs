@@ -115,7 +115,6 @@ public class DestructibleWall : MonoBehaviour
         foreach (Collider wallCollider in wallColliders)
         {
             if (wallCollider == null ||
-                wallCollider.isTrigger ||
                 IsPartOfFracturedWall(wallCollider.transform))
             {
                 continue;
