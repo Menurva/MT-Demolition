@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public class MainMenuEvent : MonoBehaviour
 {
-    private const string GameplaySceneName = "Mechanic test";
+    private const string GameplaySceneName = "Mechanic test 1";
     private const string StartButtonName = "StartGameButton";
     private const string QuitButtonName = "QuitGameButton";
 

@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/GDS5/GDS 5_Scenes/MainMenu.unity
     guid: aace51107628623459965d8fea1f15d7
   - enabled: 1
-    path: Assets/GDS5/GDS 5_Scenes/Mechanic test.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/GDS5/GDS 5_Scenes/Mechanic test 1.unity
+    guid: d7275a61e4301fd4482f09c200c9252b
   m_configObjects:
     com.unity.adaptivePerformance.basic.provider_settings: {fileID: 11400000, guid: 14506bd3ef818ff4c89a81dbb9e2d1ca, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: f02290507d51f634aa432dfea02fa4e7, type: 2}

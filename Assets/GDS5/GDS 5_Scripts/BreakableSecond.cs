@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class BreakableSecond : MonoBehaviour
@@ -7,7 +8,11 @@ public class BreakableSecond : MonoBehaviour
     [SerializeField] private float _collisionmultiplier = 100f;
     [SerializeField] private bool _preserveReplacementScale;
     [SerializeField] private bool _broken;
-    
+
+    public event Action<BreakableSecond> Broken;
+
+    public bool IsBroken => _broken;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void OnCollisionEnter(Collision collision)
     {
@@ -33,9 +38,11 @@ public class BreakableSecond : MonoBehaviour
             {
                 rb.AddExplosionForce(collision.relativeVelocity.magnitude * _collisionmultiplier, collision.contacts[0].point, 2f);
             }
+
+            Broken?.Invoke(this);
             Destroy(gameObject);
         }
     }
 }
 
-// BreakableSecond replaces a hit object, optionally keeps the replacement prefab's saved scale, pushes the fractured pieces, and removes the intact object.
+// BreakableSecond replaces a hit object, pushes the fractured pieces, and reports the successful break before removing the intact object.
